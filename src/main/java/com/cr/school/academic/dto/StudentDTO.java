@@ -1,12 +1,19 @@
 package com.cr.school.academic.dto;
 
-import com.cr.school.academic.entities.Type;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class StudentDTO {
 
-    String name;
-    String lastname;
-    Long dni;
-    Type studentStatus;
-    Short studentCareer;
+    private String name;
+    private String lastname;
+    private Long dni;
+    private Long studentStatus;
+    private Short studentCareer;
 }

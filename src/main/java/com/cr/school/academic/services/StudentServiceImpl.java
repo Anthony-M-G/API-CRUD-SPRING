@@ -1,7 +1,9 @@
 package com.cr.school.academic.services;
 
+import com.cr.school.academic.dto.StudentDTO;
 import com.cr.school.academic.entities.Student;
 import com.cr.school.academic.repositories.StudentRepository;
+import com.cr.school.academic.repositories.TypeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,10 +15,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class StudentServiceImpl implements StudentServices{
     private final StudentRepository studentRepository;
+    private final TypeRepository typeRepository;
 
 
-    public StudentServiceImpl(StudentRepository studentRepository) {
+    public StudentServiceImpl(StudentRepository studentRepository,TypeRepository typeRepository) {
         this.studentRepository = studentRepository;
+        this.typeRepository=typeRepository;
 
     }
 
@@ -32,19 +36,37 @@ public class StudentServiceImpl implements StudentServices{
     }
 
     @Override
-    public void save(Student student) {
-        studentRepository.save(student);
+    public ResponseEntity<String> save(StudentDTO studentDTO) {
+        if (studentRepository.existsByDni(studentDTO.getDni()))
+            return new ResponseEntity<>("Estudiante ya existe", HttpStatus.BAD_REQUEST);
+        else if (studentDTO.getDni() == null)
+            return new ResponseEntity<>("Faltan parámetros del estudiante", HttpStatus.BAD_REQUEST);
+        else {
+            Student student = new Student(studentDTO.getName(),
+                    studentDTO.getLastname(),
+                    studentDTO.getDni(),
+                    typeRepository.findByValue(studentDTO.getStudentStatus()),
+                    studentDTO.getStudentCareer());
+            studentRepository.save(student);
+            return new ResponseEntity<>("Estudiante insertado correctamente", HttpStatus.OK);
+        }
     }
-
     @Override
     public ResponseEntity<String> findByDni(Long dni) {
-        if(studentRepository.findByDni(dni).isEmpty()) return new ResponseEntity<>("El estudiante con el dni: "+dni+" no existe",HttpStatus.BAD_REQUEST);
-        return new ResponseEntity<>(studentRepository.findByDni(dni).get().toString(),HttpStatus.OK);
+        if(studentRepository.findOneByDni(dni)==null) return new ResponseEntity<>("El estudiante con el dni: "+dni+" no existe",HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(studentRepository.findOneByDni(dni).toString(),HttpStatus.OK);
     }
 
     @Override
-    public Student updateStudent(Student student) {
-        return studentRepository.save(student);
+    public ResponseEntity<String> updateStudent(StudentDTO studentDTO) {
+        Student student = studentRepository.findOneByDni(studentDTO.getDni());
+        if (student != null) {
+            student.setStudentStatus(typeRepository.findByValue(studentDTO.getStudentStatus()));
+            studentRepository.save(student);
+            return new ResponseEntity<>("Estudiante actualizado correctamente", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Estudiante no existe", HttpStatus.BAD_REQUEST);
+        }
     }
     @Override
     public ResponseEntity<String> deleteById(Long id) {

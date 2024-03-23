@@ -1,5 +1,6 @@
 package com.cr.school.academic.controllers;
 
+import com.cr.school.academic.dto.StudentDTO;
 import com.cr.school.academic.entities.Student;
 import com.cr.school.academic.services.StudentServices;
 import lombok.extern.slf4j.Slf4j;
@@ -23,21 +24,13 @@ public class StudentController {
         
         return studentServices.getAll(page, size,name);
     }
-
     @PostMapping("/save")
-    public String save(@RequestBody Student student){
-        studentServices.save(student);
-        return "/test/all";
+    public ResponseEntity<String> save(@RequestBody StudentDTO studentDTO){
+        return studentServices.save(studentDTO);
     }
-    @GetMapping("/get/")
-    public ResponseEntity<String> getByDni(@RequestParam Long dni){
-        return studentServices.findByDni(dni);
-    }
-
     @PutMapping("/edit")
-    public Student updateStudent(@RequestBody Student student, @RequestParam short id) {
-        student.getStudentStatus();
-        return studentServices.updateStudent(student);
+    public ResponseEntity<String> updateStudent(@RequestBody StudentDTO studentDTO) {
+        return studentServices.updateStudent(studentDTO);
     }
 
     @DeleteMapping("/delete/{id}")
