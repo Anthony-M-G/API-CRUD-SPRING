@@ -1,13 +1,16 @@
 package com.cr.school.academic.controllers;
 
 import com.cr.school.academic.dto.StudentDTO;
-import com.cr.school.academic.entities.Student;
 import com.cr.school.academic.services.StudentServices;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Validated
 @RequestMapping(value = "/test")
 @Slf4j
 public class StudentController {
@@ -25,17 +28,21 @@ public class StudentController {
         return studentServices.getAll(page, size,name);
     }
     @PostMapping("/save")
-    public ResponseEntity<String> save(@RequestBody StudentDTO studentDTO){
+    public ResponseEntity<String> save(@RequestBody @Valid StudentDTO studentDTO){
         return studentServices.save(studentDTO);
     }
-    @PutMapping("/edit")
-    public ResponseEntity<String> updateStudent(@RequestBody StudentDTO studentDTO) {
-        return studentServices.updateStudent(studentDTO);
+    @PutMapping("/update/{id}")
+    public ResponseEntity<String> updateStudent(@RequestBody @Valid StudentDTO studentDTO, @PathVariable(name = "id") @Min(1) Long id) {
+        return studentServices.updateStudent(studentDTO,id);
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteById(@PathVariable(name = "id") Long id){
+    public ResponseEntity<String> deleteById(@PathVariable(name = "id") @Min(1) Long id){
         return studentServices.deleteById(id);
+    }
+    @GetMapping("/get/{id}")
+    public ResponseEntity<Object> findById(@PathVariable(name = "id") @Min(1) Long id){
+        return studentServices.findById(id);
     }
 
 }

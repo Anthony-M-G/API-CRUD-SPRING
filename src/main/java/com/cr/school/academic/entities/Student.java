@@ -43,7 +43,7 @@ public class Student implements Serializable {
         this.studentCareer = studentCareer;
     }
 
-    public static Type typeOf(Long number) {  //Este es otro método para instanciar el tipo type en el campo necesario para guardar una instancia de student
+    /*public static Type typeOf(Long number) {  //Este es otro método para instanciar el tipo type en el campo necesario para guardar una instancia de student
         if (number == 1)
             return new Type(number, "Cursando", "student_status");
 
@@ -53,7 +53,7 @@ public class Student implements Serializable {
         else {
             return new Type(number, "Baja", "student_status");
         }
-    }
+    }*/
 
     @Override
     public String toString() {

@@ -10,9 +10,11 @@ public interface StudentServices {
     ResponseEntity<String> save(StudentDTO studentDTO);
     ResponseEntity<String> findByDni(Long dni);
 
-    ResponseEntity<String> updateStudent(StudentDTO studentDTO);
+    ResponseEntity<String> updateStudent(StudentDTO studentDTO, Long id);
 
     ResponseEntity<String> deleteById(Long id);
+
+    ResponseEntity<Object> findById(Long id);
 
 
 }

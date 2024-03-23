@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 public class StudentServiceImpl implements StudentServices{
@@ -58,10 +60,15 @@ public class StudentServiceImpl implements StudentServices{
     }
 
     @Override
-    public ResponseEntity<String> updateStudent(StudentDTO studentDTO) {
-        Student student = studentRepository.findOneByDni(studentDTO.getDni());
-        if (student != null) {
+    public ResponseEntity<String> updateStudent(StudentDTO studentDTO, Long id) {
+        Optional<Student> optionalStudent = studentRepository.findById(id);
+        if (optionalStudent.isPresent()) {
+            Student student=optionalStudent.get();
+            student.setName(studentDTO.getName());
+            student.setLastName(studentDTO.getLastname());
+            student.setDni(studentDTO.getDni());
             student.setStudentStatus(typeRepository.findByValue(studentDTO.getStudentStatus()));
+            student.setStudentCareer(studentDTO.getStudentCareer());
             studentRepository.save(student);
             return new ResponseEntity<>("Estudiante actualizado correctamente", HttpStatus.OK);
         } else {
@@ -73,6 +80,12 @@ public class StudentServiceImpl implements StudentServices{
         if(studentRepository.findById(id).isEmpty()) return new ResponseEntity<>("El estudiante con el id:"+id+" no existe", HttpStatus.BAD_REQUEST);
         studentRepository.deleteById(id);
         return new ResponseEntity<>("Estudiante eliminado con éxito",HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Object> findById(Long id) {
+        Optional<Student> student=studentRepository.findById(id);
+        return student.<ResponseEntity<Object>>map(value -> new ResponseEntity<>(value, HttpStatus.OK)).orElse(null);
     }
 
 
