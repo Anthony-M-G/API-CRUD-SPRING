@@ -22,7 +22,7 @@ public class StudentDTO {
     private Long dni;
 
     @NotNull(message = "El estado del estudiante es requerido")
-    private Long studentStatus;
+    private String studentStatus;
     @NotNull(message = "La carrera es requerida")
     private Short studentCareer;
 }

@@ -29,12 +29,21 @@ public class StudentServiceImpl implements StudentServices{
 
     @Override
     public ResponseEntity<Object> getAll(Integer page, Integer size, String name) {
-        Pageable pageable= PageRequest.of(page, size);
-        if(name.isEmpty()) return new ResponseEntity<>(studentRepository.findAll(pageable),HttpStatus.OK); // Si el campo name viene vacío todo bien
-        else if (studentRepository.findByName(name,pageable).isEmpty())  return new ResponseEntity<>( // Si el nombre que busco no está --> BAD_REQUEST
-                studentRepository.findAll(pageable),
-                HttpStatus.BAD_REQUEST);
-        else return new ResponseEntity<>( studentRepository.findByName(name, pageable),HttpStatus.OK); // Si el nombre que busco sí está --> HttpStatus.OK
+        Pageable pageable = PageRequest.of(page, size);
+        if (name.isEmpty())
+            return new ResponseEntity<>(studentRepository.findAll(pageable)
+                    .stream()
+                    .map(student -> new StudentDTO(student.getName()
+                            , student.getLastName()
+                            , student.getDni()
+                            , student.getStudentStatus().getMeaning()
+                            , student.getStudentCareer())), HttpStatus.OK); // Si el campo name viene vacío todo bien
+        else if (studentRepository.findByName(name, pageable).isEmpty())
+            return new ResponseEntity<>( // Si el nombre que busco no está --> BAD_REQUEST
+                    studentRepository.findAll(pageable),
+                    HttpStatus.BAD_REQUEST);
+        else
+            return new ResponseEntity<>(studentRepository.findByName(name, pageable), HttpStatus.OK); // Si el nombre que busco sí está --> HttpStatus.OK
     }
 
     @Override
@@ -47,7 +56,7 @@ public class StudentServiceImpl implements StudentServices{
             Student student = new Student(studentDTO.getName(),
                     studentDTO.getLastname(),
                     studentDTO.getDni(),
-                    typeRepository.findByValue(studentDTO.getStudentStatus()),
+                    typeRepository.findByMeaning(studentDTO.getStudentStatus()),
                     studentDTO.getStudentCareer());
             studentRepository.save(student);
             return new ResponseEntity<>("Estudiante insertado correctamente", HttpStatus.OK);
@@ -67,7 +76,7 @@ public class StudentServiceImpl implements StudentServices{
             student.setName(studentDTO.getName());
             student.setLastName(studentDTO.getLastname());
             student.setDni(studentDTO.getDni());
-            student.setStudentStatus(typeRepository.findByValue(studentDTO.getStudentStatus()));
+            student.setStudentStatus(typeRepository.findByMeaning(studentDTO.getStudentStatus()));
             student.setStudentCareer(studentDTO.getStudentCareer());
             studentRepository.save(student);
             return new ResponseEntity<>("Estudiante actualizado correctamente", HttpStatus.OK);
@@ -85,8 +94,18 @@ public class StudentServiceImpl implements StudentServices{
     @Override
     public ResponseEntity<Object> findById(Long id) {
         Optional<Student> student=studentRepository.findById(id);
-        return student.<ResponseEntity<Object>>map(value -> new ResponseEntity<>(value, HttpStatus.OK)).orElse(null);
+
+        if (student.isPresent()) {
+            var studentAux = student.get();
+            return new ResponseEntity<>(new StudentDTO(studentAux.getName()
+                    , studentAux.getLastName()
+                    , studentAux.getDni()
+                    , studentAux.getStudentStatus().getMeaning()
+                    , studentAux.getStudentCareer())
+                    , HttpStatus.OK);
+        } else return new ResponseEntity<>("El estudiante con el id: " + id + " no existe", HttpStatus.BAD_REQUEST);
     }
+
 
 
 }

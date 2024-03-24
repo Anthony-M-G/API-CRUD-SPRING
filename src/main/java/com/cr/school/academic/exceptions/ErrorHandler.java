@@ -40,7 +40,7 @@ public class ErrorHandler {
         return new ResponseEntity<>(ex.getLocalizedMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
     @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<String> ConstraintViolationException(NoResourceFoundException ex){
+    public ResponseEntity<String> NoResourceFoundException(NoResourceFoundException ex){
         return new ResponseEntity<>("El parámetro es requerido", HttpStatus.NOT_FOUND);
     }
 
