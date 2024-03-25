@@ -15,4 +15,6 @@ DELETE /students/{id}: Elimina un estudiante por su ID.
 
 
 
-Pruebas con PostMan
+Pruebas con PostMan y documentación más pruebas en http://localhost:8080/swagger-ui/index.html, documentado con con OpenApi y Swagger-UI
+
+
