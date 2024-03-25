@@ -24,16 +24,18 @@ public class StudentController {
 
     @GetMapping("/students")
     @Operation(summary = "Lista los registros de los estudiantes",description = "Muestra la lista de todos los estudiantes registrados a través de un paginado, también podemos indicar un nombre y mostrar los registros que coincidan con ese nombre")
-    public ResponseEntity<Object> getAll(@RequestParam(defaultValue = "0") Integer page, // Método para listar todos y para listar según un nombre
-                                @RequestParam(defaultValue = "10") Integer size,
-                                @RequestParam(required = false,defaultValue = "") String name){
-        
-        return studentServices.getAll(page, size,name);
+    public ResponseEntity<Object> getAllStudents(
+            @RequestParam(defaultValue = "0") Integer page, // Método para listar todos y para listar según un nombre
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false, defaultValue = "") String name
+            , @RequestParam(defaultValue = "asc") String orientation
+            , @RequestParam(defaultValue = "id") String orderBy){
+        return studentServices.getAllStudents(page, size,name, orientation, orderBy);
     }
     @PostMapping("/student")
     @Operation(summary = "Ingresa un nuevo estudiante en la base de datos")
-    public ResponseEntity<String> save(@RequestBody @Valid StudentDTO studentDTO){
-        return studentServices.save(studentDTO);
+    public ResponseEntity<String> saveStudent(@RequestBody @Valid StudentDTO studentDTO){
+        return studentServices.createStudent(studentDTO);
     }
     @PutMapping("/student/{id}")
     @Operation(summary = "Actualiza el estudiante con el id indicado")
@@ -43,13 +45,13 @@ public class StudentController {
 
     @DeleteMapping("/student/{id}")
     @Operation(summary = "Elimina el estudiante con el id correspondiente")
-    public ResponseEntity<String> deleteById(@PathVariable(name = "id") @Min(1) Long id){
-        return studentServices.deleteById(id);
+    public ResponseEntity<String> deleteStudent(@PathVariable(name = "id") @Min(1) Long id){
+        return studentServices.deleteStudentById(id);
     }
     @GetMapping("/student/{id}")
     @Operation(summary = "Trae el registro del estudiante con el id especificado")
-    public ResponseEntity<Object> findById(@PathVariable(name = "id") @Min(1) Long id){
-        return studentServices.findById(id);
+    public ResponseEntity<Object> findStudent(@PathVariable(name = "id") @Min(1) Long id){
+        return studentServices.findStudentById(id);
     }
 
 }

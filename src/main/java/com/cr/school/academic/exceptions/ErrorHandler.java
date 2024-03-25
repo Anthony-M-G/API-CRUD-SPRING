@@ -1,6 +1,7 @@
 package com.cr.school.academic.exceptions;
 
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -17,7 +18,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class ErrorHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Object> handlerValidationEx(MethodArgumentNotValidException ex){
+    public ResponseEntity<Object> MethodArgumentNotValidException(MethodArgumentNotValidException ex){
         Map<String,String> errors= new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(e->{ //Esta es una lita de errores
             String fieldName= ((FieldError) e).getField();
@@ -28,11 +29,11 @@ public class ErrorHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<String> handlerNullElementEx(HttpMessageNotReadableException ex){
+    public ResponseEntity<String> HttpMessageNotReadableException(HttpMessageNotReadableException ex){
         return new ResponseEntity<>("Campo nulo, debe enviar cuerpo necesario", HttpStatus.BAD_REQUEST);
     }
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<String> handlerMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex){
+    public ResponseEntity<String> MethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex){
         return new ResponseEntity<>("El id debe ser un número", HttpStatus.BAD_REQUEST);
     }
     @ExceptionHandler(ConstraintViolationException.class)
@@ -42,6 +43,14 @@ public class ErrorHandler {
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<String> NoResourceFoundException(NoResourceFoundException ex){
         return new ResponseEntity<>("El parámetro es requerido", HttpStatus.NOT_FOUND);
+    }
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> IllegalArgumentException(IllegalArgumentException ex){
+        return new ResponseEntity<>(ex.getLocalizedMessage(),HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ResponseEntity<String> PropertyReferenceException(PropertyReferenceException ex){
+        return new ResponseEntity<>(ex.getLocalizedMessage(),HttpStatus.BAD_REQUEST);
     }
 
 
