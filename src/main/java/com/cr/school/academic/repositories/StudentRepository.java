@@ -12,7 +12,6 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
 
     boolean existsByDni(Long dni);
-    Student findOneByDni(Long dni);
 
     Page<Student> findByName(String name,Pageable pageable);
 

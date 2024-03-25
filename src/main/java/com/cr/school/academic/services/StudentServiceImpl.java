@@ -38,10 +38,9 @@ public class StudentServiceImpl implements StudentServices{
                             , student.getDni()
                             , student.getStudentStatus().getMeaning()
                             , student.getStudentCareer())), HttpStatus.OK); // Si el campo name viene vacío todo bien
-        else if (studentRepository.findByName(name, pageable).isEmpty())
-            return new ResponseEntity<>( // Si el nombre que busco no está --> BAD_REQUEST
-                    studentRepository.findAll(pageable),
-                    HttpStatus.BAD_REQUEST);
+        else if (studentRepository.findByName(name, pageable).isEmpty()){
+            log.info("No se encontraron coincidencias con el nombre: "+name);
+            return new ResponseEntity<>(studentRepository.findAll(pageable), HttpStatus.BAD_REQUEST);} // Si el nombre que busco no está --> BAD_REQUEST
         else
             return new ResponseEntity<>(studentRepository.findByName(name, pageable), HttpStatus.OK); // Si el nombre que busco sí está --> HttpStatus.OK
     }
@@ -50,8 +49,10 @@ public class StudentServiceImpl implements StudentServices{
     public ResponseEntity<String> save(StudentDTO studentDTO) {
         if (studentRepository.existsByDni(studentDTO.getDni()))
             return new ResponseEntity<>("Estudiante ya existe", HttpStatus.BAD_REQUEST);
-        else if (studentDTO.getDni() == null)
+        else if (studentDTO.getDni() == null) {
+            log.info("No se puede procesar ya que faltan parámetros de información");
             return new ResponseEntity<>("Faltan parámetros del estudiante", HttpStatus.BAD_REQUEST);
+        }
         else {
             Student student = new Student(studentDTO.getName(),
                     studentDTO.getLastname(),
@@ -61,11 +62,6 @@ public class StudentServiceImpl implements StudentServices{
             studentRepository.save(student);
             return new ResponseEntity<>("Estudiante insertado correctamente", HttpStatus.OK);
         }
-    }
-    @Override
-    public ResponseEntity<String> findByDni(Long dni) {
-        if(studentRepository.findOneByDni(dni)==null) return new ResponseEntity<>("El estudiante con el dni: "+dni+" no existe",HttpStatus.BAD_REQUEST);
-        return new ResponseEntity<>(studentRepository.findOneByDni(dni).toString(),HttpStatus.OK);
     }
 
     @Override
@@ -81,12 +77,15 @@ public class StudentServiceImpl implements StudentServices{
             studentRepository.save(student);
             return new ResponseEntity<>("Estudiante actualizado correctamente", HttpStatus.OK);
         } else {
+            log.info("No se puede actualizar, estudiante ingresado no existe");
             return new ResponseEntity<>("Estudiante no existe", HttpStatus.BAD_REQUEST);
         }
     }
     @Override
     public ResponseEntity<String> deleteById(Long id) {
-        if(studentRepository.findById(id).isEmpty()) return new ResponseEntity<>("El estudiante con el id:"+id+" no existe", HttpStatus.BAD_REQUEST);
+        if(studentRepository.findById(id).isEmpty()){
+            log.info("El estudiante con el id: "+id+" no existe");
+            return new ResponseEntity<>("El estudiante con el id:"+id+" no existe", HttpStatus.BAD_REQUEST);}
         studentRepository.deleteById(id);
         return new ResponseEntity<>("Estudiante eliminado con éxito",HttpStatus.OK);
     }
@@ -103,7 +102,10 @@ public class StudentServiceImpl implements StudentServices{
                     , studentAux.getStudentStatus().getMeaning()
                     , studentAux.getStudentCareer())
                     , HttpStatus.OK);
-        } else return new ResponseEntity<>("El estudiante con el id: " + id + " no existe", HttpStatus.BAD_REQUEST);
+        } else {
+            log.info("El estudiante con el id: " + id + " no se encuentra en base de datos");
+            return new ResponseEntity<>("El estudiante con el id: " + id + " no existe", HttpStatus.BAD_REQUEST);
+        }
     }
 
 

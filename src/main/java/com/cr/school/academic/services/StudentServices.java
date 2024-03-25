@@ -8,7 +8,6 @@ public interface StudentServices {
     ResponseEntity<Object> getAll(Integer page, Integer size, String name);
 
     ResponseEntity<String> save(StudentDTO studentDTO);
-    ResponseEntity<String> findByDni(Long dni);
 
     ResponseEntity<String> updateStudent(StudentDTO studentDTO, Long id);
 
