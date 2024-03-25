@@ -32,8 +32,6 @@ public class Type implements Serializable {
 
     @Override
     public String toString() {
-        return
-                "value: "+value + " "
-               + "meaning: "+ meaning + " " + "type: "+type ;
+        return meaning ;
     }
 }

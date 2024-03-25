@@ -2,8 +2,10 @@ package com.cr.school.academic.services;
 
 import com.cr.school.academic.dto.StudentDTO;
 import com.cr.school.academic.entities.Student;
+import com.cr.school.academic.mappers.IMapper;
 import com.cr.school.academic.repositories.StudentRepository;
 import com.cr.school.academic.repositories.TypeRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,54 +18,36 @@ import java.util.Optional;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class StudentServiceImpl implements StudentServices {
     private final StudentRepository studentRepository;
     private final TypeRepository typeRepository;
-
-
-    public StudentServiceImpl(StudentRepository studentRepository, TypeRepository typeRepository) {
-        this.studentRepository = studentRepository;
-        this.typeRepository = typeRepository;
-
-    }
-
-
+    private final IMapper<StudentDTO,Student> studentIMapper;
     @Override
     public ResponseEntity<Object> getAllStudents(Integer page, Integer size, String name, String orientation, String orderBy) {
         //Sort.Direction direction = orientation.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(orientation),orderBy));
         if (name.isEmpty())
-            return new ResponseEntity<>(studentRepository.findAll(pageable)
-                    .stream()
-                    .map(student -> new StudentDTO(student.getName()
-                            , student.getLastName()
-                            , student.getDni()
-                            , student.getStudentStatus().getMeaning()
-                            , student.getStudentCareer())), HttpStatus.OK); // Si el campo name viene vacío todo bien
+            return new ResponseEntity<>(studentIMapper.entityToDto(studentRepository.findAll(pageable)), HttpStatus.OK); // Si el campo name viene vacío todo bien
         else if (studentRepository.findByName(name, pageable).isEmpty()) {
             log.info("No se encontraron coincidencias con el nombre: " + name);
-            return new ResponseEntity<>(studentRepository.findAll(pageable), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(studentIMapper.entityToDto(studentRepository.findAll(pageable)), HttpStatus.BAD_REQUEST);
         } // Si el nombre que busco no está --> BAD_REQUEST
-        return new ResponseEntity<>(studentRepository.findByName(name, pageable).stream().map(student -> new StudentDTO(student.getName()
-                , student.getLastName()
-                , student.getDni()
-                , student.getStudentStatus().getMeaning()
-                , student.getStudentCareer())), HttpStatus.OK); // Si el nombre que busco sí está --> HttpStatus.OK
+        else return new ResponseEntity<>(studentIMapper.entityToDto(studentRepository.findByName(name, pageable)), HttpStatus.OK); // Si el nombre que busco sí está --> HttpStatus.OK
     }
 
     @Override
     public ResponseEntity<String> createStudent(StudentDTO studentDTO) {
-        if (studentRepository.existsByDni(studentDTO.getDni()))
-            return new ResponseEntity<>("Estudiante ya existe", HttpStatus.BAD_REQUEST);
+        if (studentRepository.existsByDni(studentDTO.getDni())){
+            if(!isEquals(studentDTO)) return  new ResponseEntity<>(
+                    "Estudiante ya existe pero sus campos son distintos, utilice el método update"
+                        , HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Estudiante ya existe", HttpStatus.BAD_REQUEST);}
         else if (studentDTO.getDni() == null) {
             log.info("No se puede procesar ya que faltan parámetros de información");
             return new ResponseEntity<>("Faltan parámetros del estudiante", HttpStatus.BAD_REQUEST);
         }
-        Student student = new Student(studentDTO.getName(),
-                studentDTO.getLastname(),
-                studentDTO.getDni(),
-                typeRepository.findByMeaning(studentDTO.getStudentStatus()),
-                studentDTO.getStudentCareer());
+        Student student = studentIMapper.dtoToEntity(studentDTO);
         studentRepository.save(student);
         return new ResponseEntity<>("Estudiante insertado correctamente", HttpStatus.CREATED);
 
@@ -104,14 +88,11 @@ public class StudentServiceImpl implements StudentServices {
             log.info("El estudiante con el id: " + id + " no se encuentra en base de datos");
             return new ResponseEntity<>("El estudiante con el id: " + id + " no existe", HttpStatus.BAD_REQUEST);
         }
-        Student studentAux = student.get();
-        return new ResponseEntity<>(new StudentDTO(studentAux.getName()
-                , studentAux.getLastName()
-                , studentAux.getDni()
-                , studentAux.getStudentStatus().getMeaning()
-                , studentAux.getStudentCareer())
-                , HttpStatus.OK);
+        return new ResponseEntity<>(studentIMapper.entityToDto(student.get()), HttpStatus.OK);
     }
-
+    public boolean isEquals(StudentDTO dto){
+        StudentDTO studentDTO = studentIMapper.entityToDto(studentRepository.findByDni(dto.getDni()));
+        return dto.equals(studentDTO);
+    }
 
 }

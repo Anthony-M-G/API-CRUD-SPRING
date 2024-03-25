@@ -16,4 +16,5 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     Page<Student> findByName(String name,Pageable pageable);
 
 
+    Student findByDni(Long dni);
 }
